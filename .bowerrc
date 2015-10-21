@@ -1,0 +1,5 @@
+{
+  "cwd": "./dist",
+  "directory": "bower_components",
+  "analytics": false
+}
