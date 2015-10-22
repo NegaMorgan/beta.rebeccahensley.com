@@ -27,6 +27,7 @@ gulp.task('javascript', function(){
     .pipe(gulp.dest('dist/js'));
 });
 
+// css preprocessing
 gulp.task('less', function () {
   return gulp.src(Paths.LESS_TOOLKIT_SOURCES)
     .pipe(gp.sourcemaps.init())
@@ -36,7 +37,7 @@ gulp.task('less', function () {
     .pipe(gulp.dest('dist/assets/css'))
 })
 
-gulp.task('less-min', ['less'], function () {
+gulp.task('less-min', ['less', 'css'], function () {
   return gulp.src(Paths.LESS_TOOLKIT_SOURCES)
     .pipe(gp.sourcemaps.init())
     .pipe(gp.less())
@@ -47,14 +48,25 @@ gulp.task('less-min', ['less'], function () {
     .pipe(gulp.dest('dist/assets/css'))
 })
 
+// for non-less style sources
+gulp.task('css', function () {
+  return gulp.src('src/assets/css/*')
+    .pipe(gp.sourcemaps.init())
+    .pipe(gulp.dest('dist/assets/css'))
+    .pipe(gp.csso())
+    .pipe(gp.rename({ suffix: '.min' }))
+    .pipe(gp.sourcemaps.write(Paths.HERE))
+    .pipe(gulp.dest('dist/assets/css'))
+})
+
 // optimize images with imagemin + cache those optimizations
 gulp.task('images', function() {
   return gulp.src('src/assets/img/*')
-    .pipe(gp.cache(gp.imagemin({
+    .pipe(gp.imagemin({
       optimizationLevel: 5, 
       progressive: true, 
       interlaced: true 
-    })))
+    }))
     .pipe(gulp.dest('dist/assets/img'));
 });
 
