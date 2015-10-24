@@ -91,7 +91,7 @@ gulp.task('clean', require('del').bind(null, ['dist/assets', 'dist/js']));
 
 gulp.task('watch', function(){
   gulp.watch('src/js/*.js', ['javascript', reload]);
-  gulp.watch('src/less/*.css', ['less-min', reload]);
+  gulp.watch('src/less/*', ['less-min', reload]);
   gulp.watch('src/assets/fonts/*', ['fonts', reload]);
   gulp.watch('src/assets/img/**/*', ['images', reload]);
   gulp.watch('src/*.html', ['html', reload]);
