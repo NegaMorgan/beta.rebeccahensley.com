@@ -1,3 +1,13 @@
+#contact-summary,
+#contact-form .radio {
+  display: none;
+  font-style: italic;
+}
+#footer li .btn-link {
+  font-size: 14px;
+  font-weight: normal;
+  padding: 0;
+}
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 html {
   font-family: sans-serif;
