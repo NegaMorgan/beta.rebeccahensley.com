@@ -7,29 +7,38 @@ var gulp = require('gulp'),
   lazypipe = require('lazypipe'),
   gp = require('gulp-load-plugins')({
     rename: {
-      'gulp-image-resize': 'resize'
+      'gulp-image-resize': 'resize',
+      'gulp-minify-html': 'minifyhtml'
     }
   });
 
 var Paths = {
   HERE                 : './',
   DIST                 : 'dist',
-  DIST_TOOLKIT_JS      : 'dist/toolkit.js',
+  JS_SOURCES           : 'src/js/*.js',
+  JS_DIST              : 'dist/js',
   LESS_TOOLKIT_SOURCES : 'src/less/toolkit*',
-  LESS                 : './less/**/**'
+  LESS                 : 'src/less/*',
+  CSS                  : 'dist/assets/css',
+  BG_SOURCES           : 'src/assets/img/backgrounds/*',
+  IMG_SOURCES          : 'src/assets/img/**/*',
+  IMG_DIST             : 'dist/assets/img',
+  FONT_SOURCES         : 'src/assets/fonts/*',
+  FONT_DIST            : 'dist/assets/fonts',
+  HTML_SOURCES         : 'src/*.html'
 }
 
 // lint js with jshint, combine all files into one,
 // write a minified and unminified version of file
 gulp.task('javascript', function(){
-  return gulp.src('src/js/*.js')
+  return gulp.src(Paths.JS_SOURCES)
     .pipe(gp.jshint())
     .pipe(gp.jshint.reporter('default'))
     .pipe(gp.concat('toolkit.js'))
-    .pipe(gulp.dest('dist/js'))
+    .pipe(gulp.dest(Paths.JS_DIST))
     .pipe(gp.rename({ suffix: '.min' }))
     .pipe(gp.uglify())
-    .pipe(gulp.dest('dist/js'));
+    .pipe(gulp.dest(Paths.JS_DIST));
 });
 
 // css preprocessing
@@ -39,7 +48,7 @@ gulp.task('less', function () {
     .pipe(gp.less())
     .pipe(gp.autoprefixer())
     .pipe(gp.sourcemaps.write(Paths.HERE))
-    .pipe(gulp.dest('dist/assets/css'))
+    .pipe(gulp.dest(Paths.CSS))
 })
 
 gulp.task('less-min', ['less', 'css'], function () {
@@ -50,18 +59,18 @@ gulp.task('less-min', ['less', 'css'], function () {
     .pipe(gp.csso())
     .pipe(gp.rename({ suffix: '.min' }))
     .pipe(gp.sourcemaps.write(Paths.HERE))
-    .pipe(gulp.dest('dist/assets/css'))
+    .pipe(gulp.dest(Paths.CSS))
 })
 
 // for non-less style sources
 gulp.task('css', function () {
   return gulp.src('src/assets/css/*')
     .pipe(gp.sourcemaps.init())
-    .pipe(gulp.dest('dist/assets/css'))
+    .pipe(gulp.dest(Paths.CSS))
     .pipe(gp.csso())
     .pipe(gp.rename({ suffix: '.min' }))
     .pipe(gp.sourcemaps.write(Paths.HERE))
-    .pipe(gulp.dest('dist/assets/css'))
+    .pipe(gulp.dest(Paths.CSS))
 })
 
 // image minification for below tasks
@@ -75,14 +84,14 @@ var optimizeHeavy = lazypipe()
 // generate large bg images in various sizes
 // 2x = 2560px, 1x = 1280px, default is 768px, set below
 gulp.task('backgrounds-2x', function() {
-  return gulp.src('src/assets/img/backgrounds/*')
+  return gulp.src(Paths.BG_SOURCES)
     .pipe(gp.rename({ suffix: '-2x' }))
     .pipe(optimizeHeavy())
-    .pipe(gulp.dest('dist/assets/img'));
+    .pipe(gulp.dest(Paths.IMG_DIST));
 });
 
 gulp.task('backgrounds-1x', function() {
-  return gulp.src('src/assets/img/backgrounds/*')
+  return gulp.src(Paths.BG_SOURCES)
     .pipe(gp.rename({ suffix: '-1x' }))
     .pipe(gp.resize({ 
       width : 1280,
@@ -90,11 +99,11 @@ gulp.task('backgrounds-1x', function() {
       imageMagick: true
     }))
     .pipe(optimizeHeavy())
-    .pipe(gulp.dest('dist/assets/img'));
+    .pipe(gulp.dest(Paths.IMG_DIST));
 });
 
 gulp.task('backgrounds', ['backgrounds-2x', 'backgrounds-1x'], function() {
-  return gulp.src('src/assets/img/backgrounds/*')
+  return gulp.src(Paths.BG_SOURCES)
     .pipe(gp.resize({ 
       width : 768,
       upscale : false,
@@ -105,40 +114,45 @@ gulp.task('backgrounds', ['backgrounds-2x', 'backgrounds-1x'], function() {
       progressive: true, 
       interlaced: true 
     }))
-    .pipe(gulp.dest('dist/assets/img'));
+    .pipe(gulp.dest(Paths.IMG_DIST));
 });
 
+// process everything in /assets/img except /backgrounds
 gulp.task('images', ['backgrounds'], function() {
-  return gulp.src(['src/assets/img/*', '!src/assets/img/backgrounds{,/**}'])
+  return gulp.src([Paths.IMG_SOURCES, '!src/assets/img/backgrounds{,/**}'])
     .pipe(optimizeHeavy())
-    .pipe(gulp.dest('dist/assets/img'));
+    .pipe(gulp.dest(Paths.IMG_DIST));
 });
 
 // copy over html files, use bower to include libraries
 gulp.task('html', function(){
-  return gulp.src('src/*.html')
+  return gulp.src(Paths.HTML_SOURCES)
+    .pipe(gp.minifyhtml({
+      conditionals: true,
+      spare: true
+    }))
     .pipe(wiredep({
       cwd: './dist',
       ignorePath: '../dist'
     }))
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest(Paths.DIST));
 });
 
 // copy over fonts
 gulp.task('fonts', function(){
-  return gulp.src('src/assets/fonts/*')
-    .pipe(gulp.dest('dist/assets/fonts'));
+  return gulp.src(Paths.FONT_SOURCES)
+    .pipe(gulp.dest(Paths.FONT_DIST));
 });
 
 // clean out dist, in case sources have been removed
-gulp.task('clean', require('del').bind(null, ['dist/assets', 'dist/js']));
+gulp.task('clean', require('del').bind(null, ['dist/assets', Paths.JS_DIST]));
 
 gulp.task('watch', function(){
-  gulp.watch('src/js/*.js', ['javascript', reload]);
-  gulp.watch('src/less/*', ['less-min', reload]);
-  gulp.watch('src/assets/fonts/*', ['fonts', reload]);
-  gulp.watch('src/assets/img/**/*', ['images', reload]);
-  gulp.watch('src/*.html', ['html', reload]);
+  gulp.watch(Paths.JS_SOURCES, ['javascript', reload]);
+  gulp.watch(Paths.LESS, ['less-min', reload]);
+  gulp.watch(Paths.FONT_SOURCES, ['fonts', reload]);
+  gulp.watch(Paths.IMG_SOURCES, ['images', reload]);
+  gulp.watch(Paths.HTML_SOURCES, ['html', reload]);
 });
 
 // executing tasks from the dependency array is preferred
