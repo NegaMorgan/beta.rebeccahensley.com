@@ -4,6 +4,7 @@ var gulp = require('gulp'),
   wiredep = require('wiredep').stream,
   bs = require('browser-sync').create(),
   reload = bs.reload,
+  lazypipe = require('lazypipe'),
   gp = require('gulp-load-plugins')({
     rename: {
       'gulp-image-resize': 'resize'
@@ -63,15 +64,20 @@ gulp.task('css', function () {
     .pipe(gulp.dest('dist/assets/css'))
 })
 
-// optimize images with imagemin + cache those optimizations
-gulp.task('backgrounds-2x', function() {
-  return gulp.src('src/assets/img/backgrounds/*')
-    .pipe(gp.rename({ suffix: '-2x' }))
-    .pipe(gp.imagemin({
+// image minification for below tasks
+var optimizeHeavy = lazypipe()
+    .pipe(gp.imagemin, {
       optimizationLevel: 5, 
       progressive: true, 
       interlaced: true 
-    }))
+    })
+
+// generate large bg images in various sizes
+// 2x = 2560px, 1x = 1280px, default is 768px, set below
+gulp.task('backgrounds-2x', function() {
+  return gulp.src('src/assets/img/backgrounds/*')
+    .pipe(gp.rename({ suffix: '-2x' }))
+    .pipe(optimizeHeavy())
     .pipe(gulp.dest('dist/assets/img'));
 });
 
@@ -83,11 +89,7 @@ gulp.task('backgrounds-1x', function() {
       upscale : false,
       imageMagick: true
     }))
-    .pipe(gp.imagemin({
-      optimizationLevel: 5, 
-      progressive: true, 
-      interlaced: true 
-    }))
+    .pipe(optimizeHeavy())
     .pipe(gulp.dest('dist/assets/img'));
 });
 
@@ -108,15 +110,11 @@ gulp.task('backgrounds', ['backgrounds-2x', 'backgrounds-1x'], function() {
 
 gulp.task('images', ['backgrounds'], function() {
   return gulp.src(['src/assets/img/*', '!src/assets/img/backgrounds{,/**}'])
-    .pipe(gp.imagemin({
-      optimizationLevel: 5, 
-      progressive: true, 
-      interlaced: true 
-    }))
+    .pipe(optimizeHeavy())
     .pipe(gulp.dest('dist/assets/img'));
 });
 
-// copy over html files
+// copy over html files, use bower to include libraries
 gulp.task('html', function(){
   return gulp.src('src/*.html')
     .pipe(wiredep({
