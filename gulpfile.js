@@ -44,10 +44,8 @@ gulp.task('javascript', function(){
 // css preprocessing
 gulp.task('less', function () {
   return gulp.src(Paths.LESS_TOOLKIT_SOURCES)
-    .pipe(gp.sourcemaps.init())
     .pipe(gp.less())
     .pipe(gp.autoprefixer())
-    .pipe(gp.sourcemaps.write(Paths.HERE))
     .pipe(gulp.dest(Paths.CSS))
 })
 
