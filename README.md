@@ -4,7 +4,7 @@
 
 rebeccahensley.com is a static web page. It uses Gulp as a build tool to prepare files, prefix CSS, and optimize images.
 
-Development dependencies are NPM, Bower, and Gulp.
+Development dependencies are NPM, Bower, Gulp, and ImageMagick.
 
 Clone the project and `npm install && bower install` to resolve dependencies.
 

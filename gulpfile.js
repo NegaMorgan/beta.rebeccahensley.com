@@ -1,10 +1,14 @@
 'use strict';
 
 var gulp = require('gulp'),
-  gp = require('gulp-load-plugins')(),
   wiredep = require('wiredep').stream,
   bs = require('browser-sync').create(),
-  reload = bs.reload;
+  reload = bs.reload,
+  gp = require('gulp-load-plugins')({
+    rename: {
+      'gulp-image-resize': 'resize'
+    }
+  });
 
 var Paths = {
   HERE                 : './',
@@ -60,8 +64,50 @@ gulp.task('css', function () {
 })
 
 // optimize images with imagemin + cache those optimizations
-gulp.task('images', function() {
-  return gulp.src('src/assets/img/*')
+gulp.task('backgrounds-2x', function() {
+  return gulp.src('src/assets/img/backgrounds/*')
+    .pipe(gp.rename({ suffix: '-2x' }))
+    .pipe(gp.imagemin({
+      optimizationLevel: 5, 
+      progressive: true, 
+      interlaced: true 
+    }))
+    .pipe(gulp.dest('dist/assets/img'));
+});
+
+gulp.task('backgrounds-1x', function() {
+  return gulp.src('src/assets/img/backgrounds/*')
+    .pipe(gp.rename({ suffix: '-1x' }))
+    .pipe(gp.resize({ 
+      width : 1280,
+      upscale : false,
+      imageMagick: true
+    }))
+    .pipe(gp.imagemin({
+      optimizationLevel: 5, 
+      progressive: true, 
+      interlaced: true 
+    }))
+    .pipe(gulp.dest('dist/assets/img'));
+});
+
+gulp.task('backgrounds', ['backgrounds-2x', 'backgrounds-1x'], function() {
+  return gulp.src('src/assets/img/backgrounds/*')
+    .pipe(gp.resize({ 
+      width : 768,
+      upscale : false,
+      imageMagick: true
+    }))
+    .pipe(gp.imagemin({
+      optimizationLevel: 1, 
+      progressive: true, 
+      interlaced: true 
+    }))
+    .pipe(gulp.dest('dist/assets/img'));
+});
+
+gulp.task('images', ['backgrounds'], function() {
+  return gulp.src(['src/assets/img/*', '!src/assets/img/backgrounds{,/**}'])
     .pipe(gp.imagemin({
       optimizationLevel: 5, 
       progressive: true, 
