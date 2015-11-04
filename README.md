@@ -32,10 +32,10 @@ git subtree push --prefix dist origin gh-pages
 
 ## To Do
 * ~~make images smaller~~, get page size down
-* add analytics
+* ~~add analytics~~
 * performance tuning
-* remove extra theme files (images, css)
-* metatags / seo
+* ~~remove extra theme files (images, css)~~
+* ~~metatags / seo~~
 * cross browser testing
 * add newsletter signup form
 * accessibility / aria
