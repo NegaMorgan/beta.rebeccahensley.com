@@ -49,13 +49,18 @@ gulp.task('less', function () {
     .pipe(gulp.dest(Paths.CSS))
 })
 
-gulp.task('less-min', ['less', 'css'], function () {
+gulp.task('less-min', ['html', 'less', 'css'], function () {
   return gulp.src(Paths.LESS_TOOLKIT_SOURCES)
     .pipe(gp.sourcemaps.init())
     .pipe(gp.less())
+    .pipe(gp.uncss({
+      html: [
+        'dist/index.html'
+      ]
+    }))
     .pipe(gp.autoprefixer())
     .pipe(gp.csso())
-    .pipe(gp.rename({ suffix: '.min' }))
+    .pipe(gp.rename({ suffix: '-slim.min' }))
     .pipe(gp.sourcemaps.write(Paths.HERE))
     .pipe(gulp.dest(Paths.CSS))
 })
@@ -65,8 +70,13 @@ gulp.task('css', function () {
   return gulp.src('src/assets/css/*')
     .pipe(gp.sourcemaps.init())
     .pipe(gulp.dest(Paths.CSS))
+    .pipe(gp.uncss({
+      html: [
+        'dist/index.html'
+      ]
+    }))
     .pipe(gp.csso())
-    .pipe(gp.rename({ suffix: '.min' }))
+    .pipe(gp.rename({ suffix: '-slim.min' }))
     .pipe(gp.sourcemaps.write(Paths.HERE))
     .pipe(gulp.dest(Paths.CSS))
 })
@@ -154,7 +164,7 @@ gulp.task('watch', function(){
 });
 
 // executing tasks from the dependency array is preferred
-gulp.task('build', ['javascript', 'less-min', 'images', 'fonts', 'html'], function(){
+gulp.task('build', ['javascript', 'less-min', 'images', 'fonts'], function(){
   return gulp.src('dist/**/*')
   .pipe(gp.size({ title: 'build', gzip: true }));
 });
