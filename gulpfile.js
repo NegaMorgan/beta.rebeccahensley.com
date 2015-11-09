@@ -126,7 +126,7 @@ gulp.task('images', ['backgrounds'], function() {
 gulp.task('html', function(){
   return gulp.src(Paths.HTML_SOURCES)
     .pipe(gp.minifyhtml({
-      conditionals: true,
+      comments: true,
       spare: true
     }))
     .pipe(wiredep({
