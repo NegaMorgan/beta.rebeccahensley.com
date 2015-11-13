@@ -7,16 +7,26 @@
   $(function() {
   // document is ready
 
-    var $form = $( '#contact-form' );
-    var $summary = $( '#contact-summary' );
-    var $summaryCopy = $( '#contact-summary p:first-child' );
+    var $title = $('title');
 
-    $form.submit(function(e) {
-      var opt = $('input[type="radio"][name="optionsRadios"]:checked');
-      toggleSection($form, $summary);
-      getContent(opt);
-      e.preventDefault();
-    });    
+    $( '#contact-form' ).on('submit', submitHandler);
+
+    function submitHandler(event) {
+      var formID = '#' + event.target.id;
+      var option = event.target[0].checked;
+
+      event.preventDefault();
+      requestInfo(formID, option);
+    }
+
+    function requestInfo(htmlID, option) {
+      var $requestor = $( htmlID );
+      var $result = $requestor.next();
+      var $targetLocation = $result.children();
+
+      toggleSection($requestor, $result);
+      getContent(option, $targetLocation);      
+    }
 
     function toggleSection($previousSection, $newSection) {
       $previousSection.fadeOut(function(){
@@ -24,25 +34,25 @@
       });
     }
 
-    function getContent(key) {
-      if ( key.length > 0 ) {
-        $summaryCopy.append(copyA);
+    function getContent(key, $location) { // TODO test this
+      if ( !key ) {
+        $location.append(copyB);
       } else {
-        $summaryCopy.append(copyB);
+        $location.append(copyA);
       }
     }
 
-    function sendTo(address) {
+    function sendTo(address) { // TODO test this returns a valid link
       return '<a href="mailto:' + address + '">' + address + '</a>';
     }
 
-    function copyA() {
+    function copyA() { // TODO test this returns a string
       return 'Thank you for your inquiry!';
     }
 
     // get the contents of the title tag and build contact
-    function copyB() {
-      var name = $('title').html().slice(0, 15).replace(/\s/, '').toLowerCase();
+    function copyB() { // TODO test this returns a string
+      var name = $title.html().slice(0, 15).replace(/\s/, '').toLowerCase();
       return sendTo(name.concat('author','&#6','4;','gm','ail','.','com'));
     }
 
