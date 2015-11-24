@@ -1,3 +1,7 @@
+.block-bg {
+  right: -50px;
+  left: -50px;
+}
 #contact-summary,
 #contact-form .radio {
   display: none;
