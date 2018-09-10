@@ -135,7 +135,6 @@ gulp.task('images', ['backgrounds'], function() {
 // copy over html files, use bower to include libraries
 gulp.task('html', function(){
   return gulp.src(Paths.HTML_SOURCES)
-    .pipe(gp.arialinter())
     .pipe(gp.minifyhtml({
       comments: true,
       spare: true

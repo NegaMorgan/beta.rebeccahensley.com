@@ -38,4 +38,4 @@ git subtree push --prefix dist origin gh-pages
 * ~~metatags / seo~~
 * cross browser testing
 * add newsletter signup form
-* ~~accessibility / aria~~
+* accessibility / aria
